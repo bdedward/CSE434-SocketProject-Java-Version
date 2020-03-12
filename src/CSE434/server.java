@@ -15,7 +15,7 @@ public class server
     public static void main(String[] args) throws IOException
     {
         // Step 1 : Create a socket to listen at port 1234
-        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.236"));
+        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.97"));
         byte[] receive = new byte[65535];
         byte buf[] = null;
         String[] token;

@@ -1,5 +1,8 @@
 package CSE434;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.*;
@@ -11,13 +14,17 @@ public class client
 {
     public static void main(String args[]) throws IOException
     {
-
+        ring leftuser = new ring();
+        ring rightuser = new ring();
+        user myuser = new user();
+        ArrayList<record> RecordList = new ArrayList<>();
+        int nUsers = 0;
         Scanner sc = new Scanner(System.in);
         // Step 1:Create the socket object for
         // carrying the data.
         DatagramSocket ds = new DatagramSocket();
-
-        InetAddress ip = InetAddress.getLocalHost();
+        //System.out.println(InetAddress.getLocalHost());
+        InetAddress ip = InetAddress.getByName("192.168.0.97");
         byte buf[] = null;
         byte[] receive = new byte[65535];
         DatagramPacket DpReceive = null;
@@ -30,10 +37,10 @@ public class client
         // loop while user not enters "bye"
         while (true)
         {
-
             System.out.println("start");
             String inp = null;
-            if(sc.hasNextLine()) {
+
+            if(sc.nextLine().isEmpty()) {
                 inp = sc.nextLine();
                 token = tokenize(inp);
 
@@ -47,7 +54,7 @@ public class client
                     //Receive message from server
                     DpReceive = recvFServer(ds, receive);
 
-
+                    //myuser.
 //                    SocketAddress address = new InetSocketAddress(token[2],Integer.parseInt(token[3]));
                     p2p = new DatagramSocket(Integer.parseInt(token[3]), InetAddress.getByName(token[2]));
                     p2p.setSoTimeout(100);
@@ -99,6 +106,7 @@ public class client
                         receive = new byte[65536];
                     }
                 }
+
             }
 
 
@@ -109,6 +117,12 @@ public class client
                 p2p.receive(DpReceive);
                 if(!data(receive).toString().isEmpty()) {
                     token = tokenize(data(receive).toString());
+                    if(token[0].equals("Ring-Info")){
+                        setNeighbor(token, leftuser, rightuser, myuser, nUsers);
+                    }
+                    else if(token[0].equals("Set-Record")){
+                        RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
+                    }
                     System.out.println(data(receive));
                 }
             } catch(IOException e) {
@@ -246,11 +260,110 @@ public class client
             System.out.println(p2pSend.getSocketAddress());
                     p2p.send(p2pSend);
 
+
         }
 
         for(int i = 0; i < userRing.size(); i++) {
             System.out.println(userRing.get(i).identifier);
         }
+        LineHashing(d.nUsers, userRing.get(1));
 
+    }
+
+    static void setNeighbor(String[] token, ring leftuser, ring rightuser, user myuser, int nUsers){
+        nUsers = Integer.parseInt(token[1]);
+        leftuser.identifier = Integer.parseInt(token[2]);
+        leftuser.ip_addr = token[3];
+        leftuser.port = Integer.parseInt(token[4]);
+        rightuser.identifier = Integer.parseInt(token[5]);
+        rightuser.ip_addr = token[6];
+        rightuser.port = Integer.parseInt(token[7]);
+        myuser.identifier = Integer.parseInt(token[5]) - 1;
+    }
+
+    static void LineHashing(int nUsers, ring rightuser) throws FileNotFoundException {
+        byte[] buf = null;
+        //ArrayList<record> R = new ArrayList<>();
+        //record Record[] = new record[242];
+        String recordmessage;
+        String delim = " ";
+        int position;
+        int id;
+        int longSum = 0;
+
+        int j = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\bened\\IdeaProjects\\socketproject\\src\\StatsCountry.csv"))) {
+
+            for (String line; (line = br.readLine()) != null; ) {
+                line = br.readLine();
+                String inp = line.toString();
+                StringTokenizer tokenize = new StringTokenizer(inp, ",");
+                String token[] = new String[100];
+                int i = 0;
+                while (tokenize.hasMoreElements()) {
+                    token[i] = tokenize.nextToken();
+                    //System.out.println(token[i]);
+                    i++;
+                }
+                recordmessage = "Set-Record" + token[0] + delim + token[1] + delim + token[2]
+                        + delim + token[3] + delim + token[4] + delim + token[5] + delim + token[6]
+                        + delim + token[7] + delim + token[8];
+
+//                for (int k = 0; k < token[3].length(); k++)
+//                    longSum += token[3].charAt(k);
+//
+//                position = longSum % 353;
+//                id = position % nUsers;
+
+                buf = recordmessage.getBytes();
+
+                //sendToServer( buf, d.n.get(j).ip_addr ,DatagramSocket ds)
+
+                DatagramPacket DpSend =
+                        new DatagramPacket(buf, buf.length, InetAddress.getByName(rightuser.ip_addr), rightuser.port);
+                DpSend.setData(buf);
+            }
+            // line is not visible here.
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    static void RecordHandler(String[] token, ring rightuser, user myuser, ArrayList<record> RecordList, int nUsers, DatagramSocket p2p) throws IOException {
+        record R = new record();
+        byte[] buf = null;
+        int longSum = 0;
+        for (int k = 0; k < token[3].length(); k++)
+            longSum += token[3].charAt(k);
+
+        int position = longSum % 353;
+        int id = position % nUsers;
+
+        R.countrycode = token[1];
+        R.shortName = token[2];
+        R.tableName = token[3];
+        R.longName = token[4];
+        R.twoAlphaCode = token[5];
+        R.currency = token[6];
+        R.region = token[7];
+        R.wbTwoCode = token[8];
+        R.ltPopCen = Integer.parseInt(token[9]);
+
+        if(myuser.identifier == id){
+            RecordList.add(R);
+        }
+        else{
+           String message = token.toString();
+            buf = message.getBytes();
+            DatagramPacket p2pSend =
+                    new DatagramPacket(
+                            buf,
+                            buf.length,
+                            InetAddress.getByName(rightuser.ip_addr),
+                            rightuser.port
+                    );
+            p2p.send(p2pSend);
+        }
     }
 }
