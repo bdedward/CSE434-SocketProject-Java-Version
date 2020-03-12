@@ -100,7 +100,7 @@ public class client
 
                         receive = new byte[65535];
 
-                        d = setupDht(ds, receive, DpReceive, token);
+                        d = setupDht(ds, receive, DpReceive, token, d);
                         setUserId(p2p, d, receive, userRing);
                     }
                     else{
@@ -108,33 +108,42 @@ public class client
                         receive = new byte[65536];
                     }
                 }
+                else if(token[0].equals("wait")) {
+                    boolean flag = true;
+                    while(flag == true) {
+                        p2p.setSoTimeout(100);
+                        try {
+                            DpReceive = new DatagramPacket(receive, 0, receive.length);
+                            DpReceive.setData(receive, 0, receive.length);
+                            p2p.receive(DpReceive);
+                            if (!data(receive).toString().isEmpty()) {
+                                token = tokenize(data(receive).toString());
+                                System.out.println(data(receive));
+                                if (token[0].equals("Ring-Info")) {
+                                    setNeighbor(token, leftuser, rightuser, myuser, nUsers);
+                                    System.out.println(leftuser.identifier + " " + rightuser.identifier + " hello");
+                                } else if (token[0].equals("Set-Record")) {
+                                    System.out.println(token.toString());
+                                    RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
 
-            }
+                                } else if (token[0].equals("stop")) {
+                                    flag = false;
+                                }
+                                receive = new byte[65535];
+                            }
 
-
-            System.out.println(p2p.getSoTimeout());
-            p2p.setSoTimeout(100);
-            try {
-                assert DpReceive != null;
-                DpReceive.setData(receive, 0, receive.length);
-                p2p.receive(DpReceive);
-                if(!data(receive).toString().isEmpty()) {
-                    token = tokenize(data(receive).toString());
-                    if(token[0].equals("Ring-Info")){
-                        setNeighbor(token, leftuser, rightuser, myuser, nUsers);
-                    }
-                    else if(token[0].equals("Set-Record")){
-                        RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
-
-                    }
-                    System.out.println(data(receive));
-                    receive = new byte[65535];
-                }
-            } catch(IOException e) {
+                        } catch (IOException e) {
 //                continue;
+                        }
+                    }
+
+                    System.out.println("NonBlock");
+                }
+
             }
 
-            System.out.println("NonBlock");
+
+
 
 
             // break the loop if user enters "bye"
@@ -197,8 +206,8 @@ public class client
         return DpReceive;
     }
 
-    static dht setupDht(DatagramSocket ds, byte[] receive, DatagramPacket DpReceive, String token[]) throws IOException {
-        dht d = new dht();
+    static dht setupDht(DatagramSocket ds, byte[] receive, DatagramPacket DpReceive, String token[], dht d) throws IOException {
+
 
         boolean check = true;
         while(check){
@@ -300,14 +309,6 @@ public class client
         //record Record[] = new record[242];
         String recordmessage;
         String delim = " ";
-        int position;
-        int id;
-        int longSum = 0;
-
-        int j = 0;
-
-//        System.out.println("Working Directory = " +
-//                System.getProperty("user.dir"));
 
 
         try (BufferedReader br = new BufferedReader(new FileReader("StatsCountry.csv"))) {
@@ -323,7 +324,7 @@ public class client
                     //System.out.println(token[i]);
                     i++;
                 }
-                recordmessage = "Set-Record" + token[0] + delim + token[1] + delim + token[2]
+                recordmessage = "Set-Record" + delim + token[0] + delim + token[1] + delim + token[2]
                         + delim + token[3] + delim + token[4] + delim + token[5] + delim + token[6]
                         + delim + token[7] + delim + token[8];
 
@@ -336,7 +337,7 @@ public class client
                 buf = recordmessage.getBytes();
 
                 //sendToServer( buf, d.n.get(j).ip_addr ,DatagramSocket ds)
-
+                System.out.println(rightuser.identifier + " " + rightuser.ip_addr + " " + rightuser.port);
                 DatagramPacket DpSend =
                         new DatagramPacket(buf, buf.length, InetAddress.getByName(rightuser.ip_addr), rightuser.port);
                 DpSend.setData(buf);
