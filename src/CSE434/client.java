@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -23,8 +25,8 @@ public class client
         // Step 1:Create the socket object for
         // carrying the data.
         DatagramSocket ds = new DatagramSocket();
-        //System.out.println(InetAddress.getLocalHost());
-        InetAddress ip = InetAddress.getByName("192.168.0.97");
+        System.out.println(InetAddress.getLocalHost());
+        InetAddress ip = InetAddress.getByName("192.168.0.236");
         byte buf[] = null;
         byte[] receive = new byte[65535];
         DatagramPacket DpReceive = null;
@@ -40,7 +42,7 @@ public class client
             System.out.println("start");
             String inp = null;
 
-            if(sc.nextLine().isEmpty()) {
+            if(sc.hasNextLine()) {
                 inp = sc.nextLine();
                 token = tokenize(inp);
 
@@ -113,6 +115,7 @@ public class client
             System.out.println(p2p.getSoTimeout());
             p2p.setSoTimeout(100);
             try {
+                assert DpReceive != null;
                 DpReceive.setData(receive, 0, receive.length);
                 p2p.receive(DpReceive);
                 if(!data(receive).toString().isEmpty()) {
@@ -122,8 +125,10 @@ public class client
                     }
                     else if(token[0].equals("Set-Record")){
                         RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
+
                     }
                     System.out.println(data(receive));
+                    receive = new byte[65535];
                 }
             } catch(IOException e) {
 //                continue;
@@ -235,17 +240,28 @@ public class client
         String setIdMessage;
 
         for(int i = 1; i < 2; i++){
-            n.identifier = i;
-            n.ip_addr = d.n.get(i).ip_addr;
-            n.port = d.n.get(i).port;
+            ring b = new ring();
+            b.identifier = i;
+            b.ip_addr = d.n.get(i).ip_addr;
+            b.port = d.n.get(i).port;
 
-            userRing.add(n);
+            userRing.add(b);
         }
 
+        int j = 0;
+        int leftUser = 0;
+        int rightUser = 0;
         for(int i = 1; i < userRing.size(); i++){
-            setIdMessage =  userRing.get(i-1).identifier + " " +
-                            userRing.get(i-1).ip_addr + " " +
-                            userRing.get(i-1).port;
+            if(i == userRing.size() - 1){
+                rightUser = 0;
+            }
+            setIdMessage =  "Ring-Info " + d.nUsers + " " +
+                            userRing.get(leftUser).identifier + " " +
+                            userRing.get(leftUser).ip_addr + " " +
+                            userRing.get(leftUser).port + " " +
+                            userRing.get(rightUser).identifier + " " +
+                            userRing.get(rightUser).ip_addr + " " +
+                            userRing.get(rightUser).port;
 
             buf = setIdMessage.getBytes();
             DatagramPacket p2pSend =
@@ -255,10 +271,7 @@ public class client
                                     InetAddress.getByName(userRing.get(i).ip_addr),
                                     userRing.get(i).port
                             );
-            System.out.println(p2pSend.getAddress() + " " + InetAddress.getByName(userRing.get(i).ip_addr));
-            System.out.println(p2pSend.getPort() + " " + userRing.get(i).port);
-            System.out.println(p2pSend.getSocketAddress());
-                    p2p.send(p2pSend);
+             p2p.send(p2pSend);
 
 
         }
@@ -292,7 +305,12 @@ public class client
         int longSum = 0;
 
         int j = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\bened\\IdeaProjects\\socketproject\\src\\StatsCountry.csv"))) {
+
+//        System.out.println("Working Directory = " +
+//                System.getProperty("user.dir"));
+
+
+        try (BufferedReader br = new BufferedReader(new FileReader("StatsCountry.csv"))) {
 
             for (String line; (line = br.readLine()) != null; ) {
                 line = br.readLine();
