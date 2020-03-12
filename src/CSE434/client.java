@@ -40,10 +40,10 @@ public class client
             System.out.println("start");
             String inp = null;
 
-            if(sc.hasNextLine()) {
+            if(sc.nextLine().isEmpty()) {
                 inp = sc.nextLine();
                 token = tokenize(inp);
-                System.out.println(token[0]);
+
                 if(token[0].equals("register")){
                     //Convert string to bytes and send to server
                     buf = inp.getBytes();
@@ -106,31 +106,7 @@ public class client
                         receive = new byte[65536];
                     }
                 }
-                else if(token[0].equals("Wait")){
-                    boolean flag = true;
-                    while(flag == true) {
-                        p2p.setSoTimeout(100);
-                        try {
-                            DpReceive.setData(receive, 0, receive.length);
-                            p2p.receive(DpReceive);
-                            if (!data(receive).toString().isEmpty()) {
-                                token = tokenize(data(receive).toString());
-                                if (token[0].equals("Ring-Info")) {
-                                    setNeighbor(token, leftuser, rightuser, myuser, nUsers);
-                                }
-                                else if (token[0].equals("Set-Record")) {
-                                    RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
-                                }
-                                else if(token[0].equals("Stop")){
-                                    flag = false;
-                                }
-                                System.out.println(data(receive));
-                            }
-                        } catch (IOException e) {
-//                continue;
-                        }
-                    }
-                }
+
             }
 
 
@@ -316,7 +292,7 @@ public class client
         int longSum = 0;
 
         int j = 0;
-        try (BufferedReader br = new BufferedReader(new FileReader("StatsCountry.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\bened\\IdeaProjects\\socketproject\\src\\StatsCountry.csv"))) {
 
             for (String line; (line = br.readLine()) != null; ) {
                 line = br.readLine();
