@@ -9,13 +9,14 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.Random;
 
 public class server
 {
     public static void main(String[] args) throws IOException
     {
         // Step 1 : Create a socket to listen at port 1234
-        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.236"));
+        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.97"));
         byte[] receive = new byte[65535];
         byte buf[] = null;
         String[] token;
@@ -101,7 +102,18 @@ public class server
                     sendToClient(buf, ip, ds, port);
                 }
             }
+            else if(token[0].equals("query-dht")){
+                //random index between 0 and nUsers-1
+                Random rand = new Random();
+                int rand_index = rand.nextInt(d.nUsers);
 
+                String queryResponse = "Success " + d.n.get(rand_index).identifier + " " + d.n.get(rand_index).ip_addr +
+                        " " + d.n.get(rand_index).port;
+
+                buf = queryResponse.getBytes();
+                sendToClient(buf, ip, ds, port);
+
+            }
 
             // Exit the server if the client sends "bye"
             if (data(receive).toString().equals("bye"))
