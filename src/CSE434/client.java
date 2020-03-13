@@ -35,11 +35,13 @@ public class client
 
         // loop while user not enters "bye"
         while (true) {
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(System.in));
+
             System.out.println("start");
             String inp = null;
-
-            if (sc.hasNextLine()) {
-                inp = sc.nextLine();
+            if (reader.ready()) {
+                inp = reader.readLine();
                 token = tokenize(inp);
 
                 if (token[0].equals("register")) {
@@ -73,7 +75,6 @@ public class client
                     buf = inp.getBytes();
 
                     sendToServer(buf, ip, ds);
-
 
                     DpReceive.setData(receive, 0, receive.length);
                     ds.receive(DpReceive);
@@ -133,55 +134,67 @@ public class client
                                         Integer.parseInt(token[3])
                                 );
                         p2p.send(p2pSend);
-                    } else if (token[0].equals("wait")) {
-                        boolean flag = true;
-                        DpReceive = new DatagramPacket(receive, 0, receive.length);
-                        p2p.setSoTimeout(100);
-                        while (flag == true) {
-                            try {
-                                DpReceive.setData(receive, 0, receive.length);
-                                p2p.receive(DpReceive);
+                    }
+                } else if (token[0].equals("wait")) {
+                    boolean flag = true;
+                    DpReceive = new DatagramPacket(receive, 0, receive.length);
+                    p2p.setSoTimeout(100);
+                    while (flag == true) {
+                        try {
+                            DpReceive.setData(receive, 0, receive.length);
+                            p2p.receive(DpReceive);
 
-                                if (!data(receive).toString().isEmpty()) {
-                                    token = tokenize(data(receive).toString());
-                                    if (token[0].equals("Ring-Info")) {
-                                        setNeighbor(token, leftuser, rightuser, myuser, Integer.parseInt(token[1]));
+                            if (!data(receive).toString().isEmpty()) {
+                                token = tokenize(data(receive).toString());
+                                if (token[0].equals("Ring-Info")) {
+                                    setNeighbor(token, leftuser, rightuser, myuser, Integer.parseInt(token[1]));
 
-                                    } else if (token[0].equals("Set-Record")) {
-                                        StringTokenizer tokenize = new StringTokenizer(data(receive).toString(), ",");
-                                        String tokenComma[] = new String[100];
-                                        int i = 0;
-                                        while (tokenize.hasMoreElements()) {
-                                            tokenComma[i] = tokenize.nextToken();
-                                            i++;
-                                        }
-                                        RecordHandler(tokenComma, rightuser, myuser, RecordList, nUsers, p2p);
-
-                                    } else if (token[0].equals("stop")) {
-                                        flag = false;
-
-                                        buf = "stop".getBytes();
-                                        DatagramPacket p2pSend =
-                                                new DatagramPacket(
-                                                        buf,
-                                                        buf.length,
-                                                        InetAddress.getByName(rightuser.ip_addr),
-                                                        rightuser.port
-                                                );
-                                        p2p.send(p2pSend);
+                                } else if (token[0].equals("Set-Record")) {
+                                    StringTokenizer tokenize = new StringTokenizer(data(receive).toString(), ",");
+                                    String tokenComma[] = new String[100];
+                                    int i = 0;
+                                    while (tokenize.hasMoreElements()) {
+                                        tokenComma[i] = tokenize.nextToken();
+                                        i++;
                                     }
+                                    RecordHandler(tokenComma, rightuser, myuser, RecordList, nUsers, p2p);
 
+                                } else if (token[0].equals("stop")) {
+                                    flag = false;
+
+                                    buf = "stop".getBytes();
+                                    DatagramPacket p2pSend =
+                                            new DatagramPacket(
+                                                    buf,
+                                                    buf.length,
+                                                    InetAddress.getByName(rightuser.ip_addr),
+                                                    rightuser.port
+                                            );
+                                    p2p.send(p2pSend);
                                 }
-                                receive = new byte[65535];
-                            } catch (IOException e) {
-//                continue;
+
                             }
+                            receive = new byte[65535];
+
+                        } catch (IOException e) {
+//                continue;
                         }
                     }
                 }
+            } else {
+                try {
+                    DpReceive = new DatagramPacket(receive, 0, receive.length);
+                    DpReceive.setData(receive, 0, receive.length);
+                    if (!data(receive).toString().isEmpty()) {
+                        p2p.setSoTimeout(100);
+                        p2p.receive(DpReceive);
+                        //System.out.println(data(receive));
+                    }
+                } catch (IOException e) { }
             }
         }
-    }
+     }
+
     public static StringBuilder data(byte[] a)    {
         if (a == null)
             return null;
