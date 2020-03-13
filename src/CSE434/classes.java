@@ -2,22 +2,23 @@ package CSE434;
 
 import java.util.ArrayList;
 
+// User information used by server
 class user {
-    public String message;
     public String username;
     public String ip_addr;
     public String state;
     public int port;
-    public record userRecord;
     public int identifier;
 }
 
+// Used to create the logical ring
 class ring {
     public int identifier;
     public String ip_addr;
     public int port;
 }
 
+// Hold information about the records
 class record {
     public String countrycode;
     public String shortName;
@@ -30,6 +31,7 @@ class record {
     public int ltPopCen;
 }
 
+//Holds information about the DHT
 class dht{
     public boolean dhtCheck;
     public int nUsers;

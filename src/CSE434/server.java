@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Random;
@@ -15,25 +14,33 @@ public class server
 {
     public static void main(String[] args) throws IOException
     {
-        // Step 1 : Create a socket to listen at port 1234
-        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.97"));
+        //Global Variables
+        // Server socket used to listen for message from client
+        //TODO: port should be given from command line, ip should be based on host ip.
+        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.236"));
+        DatagramPacket DpReceive = null;
+
+        // Buffers for receive and send
         byte[] receive = new byte[65535];
         byte buf[] = null;
-        String[] token;
+
+        // Arraylist to store the users
         ArrayList<user> users = new ArrayList<>();
+
+        //Other Global variables
+        String[] token;
         dht d = new dht();
         boolean dhtInitiated = false;
 
-        DatagramPacket DpReceive = null;
         while (true)
         {
-
+            //When receive from client get ip and port for response
             DpReceive = recvFClient(ds, receive);
             InetAddress ip = DpReceive.getAddress();
             int port = DpReceive.getPort();
 
+            //Tokenize received message
             token = tokenize(data(receive).toString());
-
 
             if(token[0].equals("register")){
                 int check = registerUser(users, token);
@@ -115,12 +122,6 @@ public class server
 
             }
 
-            // Exit the server if the client sends "bye"
-            if (data(receive).toString().equals("bye"))
-            {
-                System.out.println("Client sent bye.....EXITING");
-                break;
-            }
 
             // Clear the buffer after every message.
             receive = new byte[65535];
@@ -129,8 +130,7 @@ public class server
 
     // A utility method to convert the byte array
     // data into a string representation.
-    public static StringBuilder data(byte[] a)
-    {
+    public static StringBuilder data(byte[] a) {
         if (a == null)
             return null;
         StringBuilder ret = new StringBuilder();
@@ -155,12 +155,14 @@ public class server
         return token;
     }
 
+    // Function to send message to Client
     static void sendToClient(byte[] a, InetAddress ip, DatagramSocket ds, int port) throws IOException {
         DatagramPacket DpSend =
                 new DatagramPacket(a, a.length, ip, port);
         ds.send(DpSend);
     }
 
+    // Function to receive from Client
     static DatagramPacket recvFClient(DatagramSocket ds, byte[] receive) throws IOException {
         DatagramPacket DpReceive = new DatagramPacket(receive, receive.length);
 
@@ -172,6 +174,7 @@ public class server
         return DpReceive;
     }
 
+    // Function to register a user
     static int registerUser(ArrayList<user> users, String token[]){
 
         for(int i = 0; i <= users.size() - 1; i++) {
@@ -192,17 +195,20 @@ public class server
 
     };
 
+    // Function to setup DHT
     static int setupDht(ArrayList<user> users, String token[], dht d){
         int indexOfLeader = 0;
         int i = 0;
         for(i = 0; i < users.size() - 1; i++){
             if(users.get(i).state.equals("Free")){
                 users.get(i).state = "InDHT";
+                users.get(i).identifier = i;
             }
             if(token[2].equals(users.get(i).username)){
                 users.get(i).state = "Leader";
                 indexOfLeader = i;
                 d.leader = users.get(i).username;
+                users.get(i).identifier = 0;
             }
             else {
                 return -2;
