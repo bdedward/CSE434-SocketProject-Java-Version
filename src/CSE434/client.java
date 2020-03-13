@@ -101,45 +101,66 @@ public class client
                         receive = new byte[65535];
 
                         d = setupDht(ds, receive, DpReceive, token, d);
-                        setUserId(p2p, d, receive, userRing);
+                        setUserId(p2p, d, receive, userRing, RecordList);
                     }
                     else{
                         System.out.println(data(receive));
                         receive = new byte[65536];
                     }
                 }
+                else if(token[0].equals("dht-complete")){
+                    String complete = token[0] + " " + token[1];
+                    buf = complete.getBytes();
+                    sendToServer(buf, ip, ds);
+
+                    DpReceive.setData(receive, 0, receive.length);
+                    recvFServer(ds, receive);
+                }
                 else if(token[0].equals("wait")) {
                     boolean flag = true;
+                    DpReceive = new DatagramPacket(receive, 0, receive.length);
+                    p2p.setSoTimeout(100);
                     while(flag == true) {
-                        p2p.setSoTimeout(100);
                         try {
-                            DpReceive = new DatagramPacket(receive, 0, receive.length);
                             DpReceive.setData(receive, 0, receive.length);
                             p2p.receive(DpReceive);
+
                             if (!data(receive).toString().isEmpty()) {
                                 token = tokenize(data(receive).toString());
-                                System.out.println(data(receive));
                                 if (token[0].equals("Ring-Info")) {
-                                    setNeighbor(token, leftuser, rightuser, myuser, nUsers);
-                                    System.out.println(leftuser.identifier + " " + rightuser.identifier + " hello");
+                                    setNeighbor(token, leftuser, rightuser, myuser, Integer.parseInt(token[1]));
+
                                 } else if (token[0].equals("Set-Record")) {
-                                    System.out.println(token.toString());
-                                    RecordHandler(token, rightuser, myuser, RecordList, nUsers, p2p);
+                                    StringTokenizer tokenize = new StringTokenizer(data(receive).toString(), ",");
+                                    String tokenComma[] = new String[100];
+                                    int i = 0;
+                                    while (tokenize.hasMoreElements()) {
+                                        tokenComma[i] = tokenize.nextToken();
+                                        i++;
+                                    }
+                                    RecordHandler(tokenComma, rightuser, myuser, RecordList, nUsers, p2p);
 
                                 } else if (token[0].equals("stop")) {
                                     flag = false;
-                                }
-                                receive = new byte[65535];
-                            }
 
+                                    buf = "stop".getBytes();
+                                    DatagramPacket p2pSend =
+                                            new DatagramPacket(
+                                                    buf,
+                                                    buf.length,
+                                                    InetAddress.getByName(rightuser.ip_addr),
+                                                    rightuser.port
+                                            );
+                                    p2p.send(p2pSend);
+                                }
+
+                            }
+                            receive = new byte[65535];
                         } catch (IOException e) {
 //                continue;
                         }
                     }
-
-                    System.out.println("NonBlock");
                 }
-
             }
 
 
@@ -235,7 +256,8 @@ public class client
         return d;
     }
 
-    static void setUserId(DatagramSocket p2p, dht d, byte[] receive, ArrayList<ring> userRing) throws IOException {
+    static void setUserId(DatagramSocket p2p, dht d, byte[] receive,
+                          ArrayList<ring> userRing, ArrayList<record> recordList) throws IOException {
         ring n = new ring();
 
         n.identifier = 0;
@@ -288,7 +310,7 @@ public class client
         for(int i = 0; i < userRing.size(); i++) {
             System.out.println(userRing.get(i).identifier);
         }
-        LineHashing(d.nUsers, userRing.get(1));
+        LineHashing(p2p, d.nUsers, userRing.get(1), recordList);
 
     }
 
@@ -303,13 +325,11 @@ public class client
         myuser.identifier = Integer.parseInt(token[5]) - 1;
     }
 
-    static void LineHashing(int nUsers, ring rightuser) throws FileNotFoundException {
+    static void LineHashing(DatagramSocket p2p, int nUsers, ring rightuser, ArrayList<record> recordList) throws IOException {
         byte[] buf = null;
-        //ArrayList<record> R = new ArrayList<>();
-        //record Record[] = new record[242];
-        String recordmessage;
-        String delim = " ";
 
+        String recordmessage;
+        String delim = ",";
 
         try (BufferedReader br = new BufferedReader(new FileReader("StatsCountry.csv"))) {
 
@@ -318,44 +338,76 @@ public class client
                 String inp = line.toString();
                 StringTokenizer tokenize = new StringTokenizer(inp, ",");
                 String token[] = new String[100];
+                record R = new record();
                 int i = 0;
                 while (tokenize.hasMoreElements()) {
                     token[i] = tokenize.nextToken();
-                    //System.out.println(token[i]);
+//                    System.out.println(token[i]);
                     i++;
                 }
                 recordmessage = "Set-Record" + delim + token[0] + delim + token[1] + delim + token[2]
                         + delim + token[3] + delim + token[4] + delim + token[5] + delim + token[6]
                         + delim + token[7] + delim + token[8];
 
-//                for (int k = 0; k < token[3].length(); k++)
-//                    longSum += token[3].charAt(k);
-//
-//                position = longSum % 353;
-//                id = position % nUsers;
-
                 buf = recordmessage.getBytes();
 
-                //sendToServer( buf, d.n.get(j).ip_addr ,DatagramSocket ds)
-                System.out.println(rightuser.identifier + " " + rightuser.ip_addr + " " + rightuser.port);
-                DatagramPacket DpSend =
-                        new DatagramPacket(buf, buf.length, InetAddress.getByName(rightuser.ip_addr), rightuser.port);
-                DpSend.setData(buf);
+                int longSum = 0;
+                for (int k = 0; k < token[3].length(); k++)
+                    longSum += token[3].charAt(k);
+
+                int position = longSum % 353;
+                int id = position % nUsers;
+                if(id == 0){
+                    R.countrycode = token[0];
+                    R.shortName = token[1];
+                    R.tableName = token[2];
+                    R.longName = token[3];
+                    R.twoAlphaCode = token[4];
+                    R.currency = token[5];
+                    R.region = token[6];
+                    R.wbTwoCode = token[7];
+                    if(token[8] != null) {
+                        R.ltPopCen = Integer.parseInt(token[8]);
+                    }
+                    recordList.add(R);
+
+                }
+                else {
+                    DatagramPacket p2pSend =
+                            new DatagramPacket(
+                                    buf,
+                                    buf.length,
+                                    InetAddress.getByName(rightuser.ip_addr),
+                                    rightuser.port
+                            );
+                    p2p.send(p2pSend);
+                }
             }
             // line is not visible here.
         } catch (IOException e) {
             e.printStackTrace();
         }
+        buf = "stop".getBytes();
+        DatagramPacket p2pSend =
+                new DatagramPacket(
+                        buf,
+                        buf.length,
+                        InetAddress.getByName(rightuser.ip_addr),
+                        rightuser.port
+                );
+        p2p.send(p2pSend);
 
     }
 
-    static void RecordHandler(String[] token, ring rightuser, user myuser, ArrayList<record> RecordList, int nUsers, DatagramSocket p2p) throws IOException {
-        record R = new record();
+    static void RecordHandler(String[] token, ring rightuser, user myuser,
+                              ArrayList<record> RecordList, int nUsers, DatagramSocket p2p) throws IOException {
+
+        nUsers = 2;
         byte[] buf = null;
         int longSum = 0;
         for (int k = 0; k < token[3].length(); k++)
             longSum += token[3].charAt(k);
-
+        record R = new record();
         int position = longSum % 353;
         int id = position % nUsers;
 

@@ -20,6 +20,8 @@ public class server
         byte buf[] = null;
         String[] token;
         ArrayList<user> users = new ArrayList<>();
+        dht d = new dht();
+        boolean dhtInitiated = false;
 
         DatagramPacket DpReceive = null;
         while (true)
@@ -46,42 +48,58 @@ public class server
                 sendToClient(buf, ip, ds, port);
             }
             else if(token[0].equals("setup-dht")){
-                dht d = new dht();
+                if(!dhtInitiated) {
+                    String message;
+                    int check = setupDht(users, token, d);
+                    if (check == -3) {
+                        message = "Failure: You need at least two users";
+                    } else if (check == -2) {
+                        message = "Failure: User does not exist, please use another user for leader";
+                    } else {
+                        message = "Success in setting up DHT";
+                        dhtInitiated = true;
+                    }
+                    d.message = message;
 
-                String message;
-                int check = setupDht(users, token, d);
-                if (check == -3) {
-                    message = "Failure: You need at least two users";
-                } else if (check == -2) {
-                    message = "Failure: User does not exist, please use another user for leader";
-                } else {
-                    message = "Success in setting up DHT";
-                    d.dhtCheck = true;
-                }
-                d.message = message;
+                    buf = d.message.getBytes();
 
-                buf = d.message.getBytes();
+                    sendToClient(buf, ip, ds, port);
 
-                sendToClient(buf, ip, ds, port);
+                    String temp = d.dhtCheck + " " + d.nUsers + " " + d.leader;
+                    buf = temp.getBytes();
+                    sendToClient(temp.getBytes(), ip, ds, port);
 
-                String temp = d.dhtCheck + " " + d.nUsers + " " + d.leader;
-                buf = temp.getBytes();
-                sendToClient(temp.getBytes(), ip, ds, port);
+                    for (int j = 0; j < d.n.size(); j++) {
+                        String userTuples = d.n.get(j).username + " " +
+                                d.n.get(j).ip_addr + " " +
+                                d.n.get(j).state + " " +
+                                d.n.get(j).port;
 
-                for(int j = 0; j < d.n.size(); j++){
-                    String userTuples = d.n.get(j).username + " " +
-                            d.n.get(j).ip_addr + " " +
-                            d.n.get(j).state + " " +
-                            d.n.get(j).port;
+                        buf = userTuples.getBytes();
+                        System.out.println(userTuples);
+                        sendToClient(buf, ip, ds, port);
+                    }
 
-                    buf = userTuples.getBytes();
-                    System.out.println(userTuples);
+                    d.message = "done";
+                    buf = d.message.getBytes();
                     sendToClient(buf, ip, ds, port);
                 }
-
-                d.message = "done";
-                buf = d.message.getBytes();
-                sendToClient(buf, ip, ds, port);
+                else {
+                    d.message = "Failure: Dht has been initiated by someone else";
+                    buf = d.message.getBytes();
+                    sendToClient(buf, ip, ds, port);
+                }
+            }
+            else if(token[0].equals("dht-complete")){
+                if(token[1].equals(d.leader)){
+                    d.dhtCheck = true;
+                    buf = "Success: DHT is complete".getBytes();
+                    sendToClient(buf, ip, ds, port);
+                }
+                else{
+                    buf = "Failure: You are not the leader".getBytes();
+                    sendToClient(buf, ip, ds, port);
+                }
             }
 
 
