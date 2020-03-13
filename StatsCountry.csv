@@ -20,7 +20,7 @@ BFA,Burkina Faso,Burkina Faso,Burkina Faso,BF,CFA franc,Sub-Saharan Africa,BF,20
 BGD,Bangladesh,Bangladesh,People's Republic of Bangladesh,BD,Bangladeshi taka,South Asia,BD,2011
 BGR,Bulgaria,Bulgaria,Republic of Bulgaria,BG,Bulgarian lev,Europe & Central Asia,BG,2011
 BHR,Bahrain,Bahrain,Kingdom of Bahrain,BH,Bahraini dinar,Middle East & North Africa,BH,2010
-BHS,The Bahamas,The Bahamas,Commonwealth of The Bahamas,BS,Bahamian dollar,Latin America & Caribbean,BS,2010
+BHS,The Bahamas,"Bahamas, The",Commonwealth of The Bahamas,BS,Bahamian dollar,Latin America & Caribbean,BS,2010
 BIH,Bosnia and Herzegovina,Bosnia and Herzegovina,Bosnia and Herzegovina,BA,Bosnia and Herzegovina convertible mark,Europe & Central Asia,BA,2013
 BLR,Belarus,Belarus,Republic of Belarus,BY,Belarusian rubel,Europe & Central Asia,BY,2009
 BLZ,Belize,Belize,Belize,BZ,Belize dollar,Latin America & Caribbean,BZ,2010
@@ -37,10 +37,10 @@ CHE,Switzerland,Switzerland,Switzerland,CH,Swiss franc,Europe & Central Asia,CH,
 CHI,Channel Islands,Channel Islands,Channel Islands,,Pound sterling,Europe & Central Asia,JG,2009
 CHL,Chile,Chile,Republic of Chile,CL,Chilean peso,Latin America & Caribbean,CL,2012
 CHN,China,China,People's Republic of China,CN,Chinese yuan,East Asia & Pacific,CN,2010
-CIV,Co«te d'Ivoire,Co«te d'Ivoire,Republic of CÌ«te d'Ivoire,CI,CFA franc,Sub-Saharan Africa,CI,1998
+CIV,Cozte d'Ivoire,Cozte d'Ivoire,Republic of CIzte d'Ivoire,CI,CFA franc,Sub-Saharan Africa,CI,1998
 CMR,Cameroon,Cameroon,Republic of Cameroon,CM,CFA franc,Sub-Saharan Africa,CM,2005
-COD,Dem. Rep. Congo,Congo Dem. Rep.,Democratic Republic of the Congo,CD,Congolese franc,Sub-Saharan Africa,ZR,1984
-COG,Congo,Congo Rep.,Republic of Congo,CG,CFA franc,Sub-Saharan Africa,CG,2007
+COD,Dem. Rep. Congo,"Congo, Dem. Rep.",Democratic Republic of the Congo,CD,Congolese franc,Sub-Saharan Africa,ZR,1984
+COG,Congo,"Congo, Rep.",Republic of Congo,CG,CFA franc,Sub-Saharan Africa,CG,2007
 COL,Colombia,Colombia,Republic of Colombia,CO,Colombian peso,Latin America & Caribbean,CO,2006
 COM,Comoros,Comoros,Union of the Comoros,KM,Comorian franc,Sub-Saharan Africa,KM,2003
 CPV,Cabo Verde,Cabo Verde,Republic of Cabo Verde,CV,Cabo Verde escudo,Sub-Saharan Africa,CV,2010
@@ -61,7 +61,7 @@ EAS,East Asia & Pacific (all income levels),East Asia & Pacific (all income leve
 ECA,Europe & Central Asia (developing only),Europe & Central Asia,Europe & Central Asia (developing only),7E,,,7E,
 ECS,Europe & Central Asia (all income levels),Europe & Central Asia (all income levels),Europe & Central Asia (all income levels),Z7,,,Z7,
 ECU,Ecuador,Ecuador,Republic of Ecuador,EC,U.S. dollar,Latin America & Caribbean,EC,2010
-EGY,Egypt,Egypt Arab Rep.,Arab Republic of Egypt,EG,Egyptian pound,Middle East & North Africa,EG,2006
+EGY,Egypt,"Egypt, Arab Rep.",Arab Republic of Egypt,EG,Egyptian pound,Middle East & North Africa,EG,2006
 EMU,Euro area,Euro area,Euro area,XC,,,XC,
 ERI,Eritrea,Eritrea,State of Eritrea,ER,Eritrean nakfa,Sub-Saharan Africa,ER,1984
 ESP,Spain,Spain,Kingdom of Spain,ES,Euro,Europe & Central Asia,ES,2011
@@ -72,14 +72,14 @@ FIN,Finland,Finland,Republic of Finland,FI,Euro,Europe & Central Asia,FI,2010
 FJI,Fiji,Fiji,Republic of Fiji,FJ,Fijian dollar,East Asia & Pacific,FJ,2007
 FRA,France,France,French Republic,FR,Euro,Europe & Central Asia,FR,2006
 FRO,Faeroe Islands,Faeroe Islands,Faeroe Islands,FO,Danish krone,Europe & Central Asia,FO,2011
-FSM,Micronesia,Micronesia Fed. Sts.,Federated States of Micronesia,FM,U.S. dollar,East Asia & Pacific,FM,2010
+FSM,Micronesia,"Micronesia, Fed. Sts.",Federated States of Micronesia,FM,U.S. dollar,East Asia & Pacific,FM,2010
 GAB,Gabon,Gabon,Gabonese Republic,GA,CFA franc,Sub-Saharan Africa,GA,2013
 GBR,United Kingdom,United Kingdom,United Kingdom of Great Britain and Northern Ireland,GB,Pound sterling,Europe & Central Asia,GB,2011
 GEO,Georgia,Georgia,Georgia,GE,Georgian lari,Europe & Central Asia,GE,2002
 GHA,Ghana,Ghana,Republic of Ghana,GH,New Ghanaian cedi,Sub-Saharan Africa,GH,2010
 GIB,Gibraltar,Gibraltar,Gibraltar,GI,Gibraltar pound,,GI,2012
 GIN,Guinea,Guinea,Republic of Guinea,GN,Guinean franc,Sub-Saharan Africa,GN,1996
-GMB,The Gambia,The Gambia,Republic of The Gambia,GM,Gambian dalasi,Sub-Saharan Africa,GM,2013
+GMB,The Gambia,"Gambia, The",Republic of The Gambia,GM,Gambian dalasi,Sub-Saharan Africa,GM,2013
 GNB,Guinea-Bissau,Guinea-Bissau,Republic of Guinea-Bissau,GW,CFA franc,Sub-Saharan Africa,GW,2009
 GNQ,Equatorial Guinea,Equatorial Guinea,Republic of Equatorial Guinea,GQ,CFA franc,Sub-Saharan Africa,GQ,2002
 GRC,Greece,Greece,Hellenic Republic,GR,Euro,Europe & Central Asia,GR,2011
@@ -89,7 +89,7 @@ GTM,Guatemala,Guatemala,Republic of Guatemala,GT,Guatemalan quetzal,Latin Americ
 GUM,Guam,Guam,Guam,GU,U.S. dollar,East Asia & Pacific,GU,2010
 GUY,Guyana,Guyana,Co-operative Republic of Guyana,GY,Guyana dollar,Latin America & Caribbean,GY,2012
 HIC,High income,High income,High income,XD,,,XD,
-HKG,Hong Kong SAR China,Hong Kong SAR China,Hong Kong Special Administrative Region of the People's Republic of China,HK,Hong Kong dollar,East Asia & Pacific,HK,2011
+HKG,"Hong Kong SAR, China","Hong Kong SAR, China",Hong Kong Special Administrative Region of the People's Republic of China,HK,Hong Kong dollar,East Asia & Pacific,HK,2011
 HND,Honduras,Honduras,Republic of Honduras,HN,Honduran lempira,Latin America & Caribbean,HN,2013
 HPC,Heavily indebted poor countries (HIPC),Heavily indebted poor countries (HIPC),Heavily indebted poor countries (HIPC),XE,,,XE,
 HRV,Croatia,Croatia,Republic of Croatia,HR,Croatian kuna,Europe & Central Asia,HR,2011
@@ -99,7 +99,7 @@ IDN,Indonesia,Indonesia,Republic of Indonesia,ID,Indonesian rupiah,East Asia & P
 IMN,Isle of Man,Isle of Man,Isle of Man,IM,Pound sterling,Europe & Central Asia,IM,2011
 IND,India,India,Republic of India,IN,Indian rupee,South Asia,IN,2011
 IRL,Ireland,Ireland,Ireland,IE,Euro,Europe & Central Asia,IE,2011
-IRN,Iran,Iran Islamic Rep.,Islamic Republic of Iran,IR,Iranian rial,Middle East & North Africa,IR,2011
+IRN,Iran,"Iran, Islamic Rep.",Islamic Republic of Iran,IR,Iranian rial,Middle East & North Africa,IR,2011
 IRQ,Iraq,Iraq,Republic of Iraq,IQ,Iraqi dinar,Middle East & North Africa,IQ,1997
 ISL,Iceland,Iceland,Republic of Iceland,IS,Iceland krona,Europe & Central Asia,IS,2011
 ISR,Israel,Israel,State of Israel,IL,Israeli new shekel,Middle East & North Africa,IL,2009
@@ -113,7 +113,7 @@ KGZ,Kyrgyz Republic,Kyrgyz Republic,Kyrgyz Republic,KG,Kyrgyz som,Europe & Centr
 KHM,Cambodia,Cambodia,Kingdom of Cambodia,KH,Cambodian riel,East Asia & Pacific,KH,2008
 KIR,Kiribati,Kiribati,Republic of Kiribati,KI,Australian dollar,East Asia & Pacific,KI,2010
 KNA,St. Kitts and Nevis,St. Kitts and Nevis,St. Kitts and Nevis,KN,East Caribbean dollar,Latin America & Caribbean,KN,2011
-KOR,Korea,Korea Rep.,Republic of Korea,KR,Korean won,East Asia & Pacific,KR,2010
+KOR,Korea,"Korea, Rep.",Republic of Korea,KR,Korean won,East Asia & Pacific,KR,2010
 KWT,Kuwait,Kuwait,State of Kuwait,KW,Kuwaiti dinar,Middle East & North Africa,KW,2011
 LAC,Latin America & Caribbean (developing only),Latin America & Caribbean,Latin America & Caribbean (developing only),XJ,,,XJ,
 LAO,Lao PDR,Lao PDR,Lao People's Democratic Republic,LA,Lao kip,East Asia & Pacific,LA,2005
@@ -132,7 +132,7 @@ LSO,Lesotho,Lesotho,Kingdom of Lesotho,LS,Lesotho loti,Sub-Saharan Africa,LS,200
 LTU,Lithuania,Lithuania,Republic of Lithuania,LT,Lithuanian litas,Europe & Central Asia,LT,2011
 LUX,Luxembourg,Luxembourg,Grand Duchy of Luxembourg,LU,Euro,Europe & Central Asia,LU,2011
 LVA,Latvia,Latvia,Republic of Latvia,LV,Latvian lats,Europe & Central Asia,LV,2011
-MAC,Macao SAR China,Macao SAR China,Macao Special Administrative Region of the People's Republic of China,MO,Macao pataca,East Asia & Pacific,MO,2011
+MAC,"Macao SAR, China","Macao SAR, China",Macao Special Administrative Region of the People's Republic of China,MO,Macao pataca,East Asia & Pacific,MO,2011
 MAF,St. Martin (French part),St. Martin (French part),St. Martin (French part),MF,Euro,Latin America & Caribbean,MF,
 MAR,Morocco,Morocco,Kingdom of Morocco,MA,Moroccan dirham,Middle East & North Africa,MA,2004
 MCO,Monaco,Monaco,Principality of Monaco,MC,Euro,Europe & Central Asia,MC,2008
@@ -143,7 +143,7 @@ MEA,Middle East & North Africa (all income levels),Middle East & North Africa (a
 MEX,Mexico,Mexico,United Mexican States,MX,Mexican peso,Latin America & Caribbean,MX,2010
 MHL,Marshall Islands,Marshall Islands,Republic of the Marshall Islands,MH,U.S. dollar,East Asia & Pacific,MH,2011
 MIC,Middle income,Middle income,Middle income,XP,,,XP,
-MKD,Macedonia,Macedonia FYR,Former Yugoslav Republic of Macedonia,MK,Macedonian denar,Europe & Central Asia,MK,2002
+MKD,Macedonia,"Macedonia, FYR",Former Yugoslav Republic of Macedonia,MK,Macedonian denar,Europe & Central Asia,MK,2002
 MLI,Mali,Mali,Republic of Mali,ML,CFA franc,Sub-Saharan Africa,ML,2009
 MLT,Malta,Malta,Republic of Malta,MT,Euro,Middle East & North Africa,MT,2011
 MMR,Myanmar,Myanmar,Republic of the Union of Myanmar,MM,Myanmar kyat,East Asia & Pacific,MM,1983
@@ -177,7 +177,7 @@ PLW,Palau,Palau,Republic of Palau,PW,U.S. dollar,East Asia & Pacific,PW,2010
 PNG,Papua New Guinea,Papua New Guinea,The Independent State of Papua New Guinea,PG,Papua New Guinea kina,East Asia & Pacific,PG,2011
 POL,Poland,Poland,Republic of Poland,PL,Polish zloty,Europe & Central Asia,PL,2011
 PRI,Puerto Rico,Puerto Rico,Puerto Rico,PR,U.S. dollar,Latin America & Caribbean,PR,2010
-PRK,Dem. People's Rep. Korea,Korea Dem. Rep.,Democratic People's Republic of Korea,KP,Democratic People's Republic of Korean won,East Asia & Pacific,KP,2008
+PRK,Dem. People's Rep. Korea,"Korea, Dem. Rep.",Democratic People's Republic of Korea,KP,Democratic People's Republic of Korean won,East Asia & Pacific,KP,2008
 PRT,Portugal,Portugal,Portuguese Republic,PT,Euro,Europe & Central Asia,PT,2011
 PRY,Paraguay,Paraguay,Republic of Paraguay,PY,Paraguayan guarani,Latin America & Caribbean,PY,2012
 PSE,West Bank and Gaza,West Bank and Gaza,West Bank and Gaza,PS,Israeli new shekel,Middle East & North Africa,GZ,2007
@@ -229,14 +229,14 @@ URY,Uruguay,Uruguay,Oriental Republic of Uruguay,UY,Uruguayan peso,Latin America
 USA,United States,United States,United States of America,US,U.S. dollar,North America,US,2010
 UZB,Uzbekistan,Uzbekistan,Republic of Uzbekistan,UZ,Uzbek sum,Europe & Central Asia,UZ,1989
 VCT,St. Vincent and the Grenadines,St. Vincent and the Grenadines,St. Vincent and the Grenadines,VC,East Caribbean dollar,Latin America & Caribbean,VC,2011
-VEN,Venezuela,Venezuela RB,RepÌ¼blica Bolivariana de Venezuela,VE,Venezuelan bolivar fuerte,Latin America & Caribbean,VE,2011
+VEN,Venezuela,"Venezuela, RB",RepÌ¼blica Bolivariana de Venezuela,VE,Venezuelan bolivar fuerte,Latin America & Caribbean,VE,2011
 VIR,Virgin Islands,Virgin Islands (U.S.),Virgin Islands of the United States,VI,U.S. dollar,Latin America & Caribbean,VI,2010
 VNM,Vietnam,Vietnam,Socialist Republic of Vietnam,VN,Vietnamese dong,East Asia & Pacific,VN,2009
 VUT,Vanuatu,Vanuatu,Republic of Vanuatu,VU,Vanuatu vatu,East Asia & Pacific,VU,2009
 WLD,World,World,World,1W,,,1W,
 WSM,Samoa,Samoa,Samoa,WS,Samoan tala,East Asia & Pacific,WS,2011
 XKX,Kosovo,Kosovo,Republic of Kosovo,,Euro,Europe & Central Asia,KV,2011
-YEM,Yemen,Yemen Rep.,Republic of Yemen,YE,Yemeni rial,Middle East & North Africa,RY,2004
+YEM,Yemen,"Yemen, Rep.",Republic of Yemen,YE,Yemeni rial,Middle East & North Africa,RY,2004
 ZAF,South Africa,South Africa,Republic of South Africa,ZA,South African rand,Sub-Saharan Africa,ZA,2011
 ZMB,Zambia,Zambia,Republic of Zambia,ZM,New Zambian kwacha,Sub-Saharan Africa,ZM,2010
 ZWE,Zimbabwe,Zimbabwe,Republic of Zimbabwe,ZW,U.S. dollar,Sub-Saharan Africa,ZW,2012
