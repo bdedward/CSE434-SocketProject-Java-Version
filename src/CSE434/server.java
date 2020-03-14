@@ -31,6 +31,9 @@ public class server
         String[] token;
         dht d = new dht();
         boolean dhtInitiated = false;
+        InetAddress queryIpSource;
+        int queryPortSource;
+        String leaveDhtUName = "";
 
         while (true)
         {
@@ -39,8 +42,11 @@ public class server
             InetAddress ip = DpReceive.getAddress();
             int port = DpReceive.getPort();
 
+
+
             //Tokenize received message
             token = tokenize(data(receive).toString());
+
 
             if(token[0].equals("register")){
                 int check = registerUser(users, token);
@@ -111,6 +117,10 @@ public class server
             }
             else if(token[0].equals("query-dht")){
                 //random index between 0 and nUsers-1
+
+                queryIpSource = DpReceive.getAddress();
+                queryPortSource = DpReceive.getPort();
+
                 Random rand = new Random();
                 int rand_index = rand.nextInt(d.nUsers);
 
@@ -119,8 +129,67 @@ public class server
 
                 buf = queryResponse.getBytes();
                 sendToClient(buf, ip, ds, port);
+                receive = new byte[65535];
+
+                DpReceive = recvFClient(ds, receive);
+                buf = data(DpReceive.getData()).toString().getBytes();
+                sendToClient(buf, queryIpSource, ds, queryPortSource);
 
             }
+            else if(token[0].equals("deregister")){
+                String message;
+                for(int i = 0; i < users.size(); i++){
+                    if(token[1].equals(users.get(i).username)){
+                        if(users.get(i).state.equals("Free")){
+                            users.remove(i);
+                            message = "Success Go ahead and exit";
+                            buf = message.getBytes();
+                            sendToClient(buf,ip,ds,port);
+                        }
+                        else{
+                            message = "Failure go ahead and jump off a building!";
+                            buf = message.getBytes();
+                            sendToClient(buf,ip,ds,port);
+                        }
+                    }
+                }
+            }
+            else if(token[0].equals("leave-dht")){
+                dhtInitiated = false;
+
+                for(int i = 0; i < users.size(); i++){
+                    if(leaveDhtUName == users.get(i).username){
+                        users.get(i).state.equals("Free");
+                    }
+                }
+
+
+                String message;
+                boolean flag = false;
+                for(int i = 0; i < d.nUsers; i++){
+                    if(token[1].equals(d.n.get(i).username)){
+                        flag = true;
+                        if((i+1) == d.nUsers){
+                            message = "Success " + d.n.get(0).username;
+                        }
+                        else {
+                            message = "Success " + d.n.get(i + 1).username;
+                        }
+                        buf = message.getBytes();
+                        sendToClient(buf,ip,ds,port);
+                        i = d.nUsers;
+                        leaveDhtUName = token[1];
+                    }
+                }
+                if(flag == false){
+                    message = "Failure you are not in DHT";
+                    buf = message.getBytes();
+                    sendToClient(buf,ip,ds,port);
+                }
+
+
+            }
+
 
 
             // Clear the buffer after every message.
@@ -199,23 +268,25 @@ public class server
     static int setupDht(ArrayList<user> users, String token[], dht d){
         int indexOfLeader = 0;
         int i = 0;
-        for(i = 0; i < users.size() - 1; i++){
+        boolean flag = false;
+        for(i = 0; i < users.size(); i++){
             if(users.get(i).state.equals("Free")){
                 users.get(i).state = "InDHT";
                 users.get(i).identifier = i;
             }
             if(token[2].equals(users.get(i).username)){
+                flag = true;
                 users.get(i).state = "Leader";
                 indexOfLeader = i;
                 d.leader = users.get(i).username;
                 users.get(i).identifier = 0;
             }
-            else {
-                return -2;
-            }
 
         }
-        d.nUsers = i + 1;
+        if(flag == false){
+            return -2;
+        }
+        d.nUsers = i;
         d.n = users;
 
         if(!token[2].equals(users.get((indexOfLeader)))){
@@ -225,8 +296,6 @@ public class server
         if(Integer.parseInt(token[1]) < 2){
             return -3;
         }
-
-
         return 0;
     }
 }
