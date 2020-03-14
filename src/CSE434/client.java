@@ -48,6 +48,7 @@ public class client
         int checkCounter = 0;
 
 
+
         // Loop forever loop Program, input is non-blocking so loops and checks
         // if input, if no input is there receive?
         while (true) {
@@ -119,7 +120,6 @@ public class client
                         d = setupDht(ds, receive, DpReceive, token, d);
                         nUsers = d.nUsers;
 
-                        System.out.println(d.nUsers);
                         rightuser.identifier = d.n.get(1).identifier;
                         rightuser.port = d.n.get(1).port;
                         rightuser.ip_addr = d.n.get(1).ip_addr;
@@ -165,8 +165,9 @@ public class client
                                 }
                             }
                         }
+                        System.out.println(temp);
                         inp = tokenComma[0] + " " + temp;
-                        message = inp + "," + token[2] + "," + token[3] + " " + 0;
+                        message = inp + " " + token[2] + " " + token[3] + " " + 0;
                         System.out.println(message);
                         buf = message.getBytes();
                         DatagramPacket p2pSend =
@@ -211,35 +212,51 @@ public class client
             }
             else if(!data(receive).toString().isEmpty()){
 
-                if (tokenReceive[0].equals("query")){
+                if (tokenReceive[0].equals("query")) {
 
-                    System.out.println("hello");
 
                     System.out.println(tokenReceive[1]);
-                    StringTokenizer tokenize = new StringTokenizer(tokenReceive[1], ",");
-                    String tokenComma[] = new String[10];
-                    int i = 0;
-                    while (tokenize.hasMoreElements()) {
-                        tokenComma[i] = tokenize.nextToken();
-                        System.out.println(tokenComma[i]);
-                        i++;
+
+
+//                    StringTokenizer tokenize = new StringTokenizer(, " ");
+//                    String tokenComma[] = new String[20];
+//                    int i = 0;
+//                    while (tokenize.hasMoreElements()) {
+//                        tokenComma[i] = tokenize.nextToken();
+//                        i++;
+//                    }
+
+                    StringBuilder longname = new StringBuilder();
+                    int tokenCounter = 0;
+                    while (!(tokenReceive[tokenCounter] == null)) {
+                        tokenCounter++;
                     }
-                    String ipAddr = tokenComma[1];
-                    int port = Integer.parseInt(tokenComma[2]);
+
+                    for(int k = 1; k < tokenCounter - 3; k++){
+                        longname.append(tokenReceive[k]);
+                        if(!(k == tokenCounter - 4)){
+                            longname.append(" ");
+                        }
+                    }
+
+                    System.out.println(longname);
 
                     int longSum = 0;
-                    for (int k = 0; k < tokenComma[0].length(); k++){
-                        longSum += tokenComma[0].charAt(k);
+                    for (int k = 0; k < longname.length(); k++){
+                        longSum += longname.charAt(k);
                     }
-                    checkCounter = Integer.parseInt(tokenReceive[2]);
+                    System.out.println(longSum);
+                    checkCounter = Integer.parseInt(tokenReceive[tokenCounter - 1]);
                     int position = longSum % 353;
-                    int id = position % 2;
+                    int id = position % nUsers;
+                    System.out.println(id + " " + nUsers + " " + myuser.identifier);
                     String message = "";
                     boolean flagFound = false;
                     if(checkCounter < nUsers) {
                         if (id == myuser.identifier) {
                             for (int j = 0; j < RecordList.size(); j++) {
-                                if (tokenComma[0].equals(RecordList.get(j).longName)) {
+                                System.out.println(RecordList.get(j).longName  + " " + longname);
+                                if (RecordList.get(j).longName.equals(longname.toString())) {
                                     flagFound = true;
                                     message = "Success: " + RecordList.get(j).countrycode + "," +
                                             RecordList.get(j).shortName + "," +
@@ -253,17 +270,22 @@ public class client
                                     j = RecordList.size();
                                 }
                             }
-                            if (!flagFound) {
-                                checkCounter++;
-                                message = tokenReceive[0] + " " + tokenReceive[1] +
-                                        " " + checkCounter;
-                                buf = message.getBytes();
-                                sendToClient(buf, rightuser.ip_addr, rightuser.port, p2p);
-                            } else {
-                                buf = message.getBytes();
-                                System.out.println(message);
-                                sendToServer(buf, ip, ds);
-                            }
+                        }
+                        if (!flagFound) {
+                            checkCounter++;
+                            System.out.println("I dont have it ! ");
+                            message = tokenReceive[0] + " " + longname + " " +
+                                    tokenReceive[tokenCounter - 3] + " " +
+                                    tokenReceive[tokenCounter - 2 ] +
+                                    " " + checkCounter;
+                            buf = message.getBytes();
+                            sendToClient(buf, rightuser.ip_addr, rightuser.port, p2p);
+                        }
+                        else {
+                            System.out.println("I have it ! ");
+                            buf = message.getBytes();
+                            System.out.println(message);
+                            sendToServer(buf, ip, ds);
                         }
 
                     }
@@ -308,6 +330,8 @@ public class client
                         rightuser = null;
                         RecordList.clear();
                         leftuser = null;
+
+
 
 
                         message = "reset-id ";
@@ -634,7 +658,7 @@ public class client
     static void RecordHandler(String[] token, ring rightuser, user myuser,
                               ArrayList<record> RecordList, int nUsers, DatagramSocket p2p) throws IOException {
 
-        byte[] buf = null;
+        byte[] buf;
         String delim = ",";
         int longSum = 0;
         for (int k = 0; k < token[3].length(); k++){
@@ -642,27 +666,30 @@ public class client
         }
         int position = longSum % 353;
         int id = position % nUsers;
-
-        record R = new record();
-        //System.out.println(token[5]);
-        R.countrycode = token[0];
-        R.shortName = token[1];
-        R.tableName = token[2];
-        R.longName = token[3];
-        R.twoAlphaCode = token[4];
-        R.currency = token[5];
-        R.region = token[6];
-        R.wbTwoCode = token[7];
-        if(token[8].equals(null)) {
-            R.ltPopCen = Integer.parseInt(token[8]);
-        }
-
-
+        System.out.println(myuser.identifier);
         if(myuser.identifier == id){
+            record R = new record();
+            R.countrycode = token[0];
+            R.shortName = token[1];
+            R.tableName = token[2];
+            R.longName = token[3];
+            R.twoAlphaCode = token[4];
+            R.currency = token[5];
+            R.region = token[6];
+            R.wbTwoCode = token[7];
+            try {
+                R.ltPopCen = Integer.parseInt(token[8]);
+            } catch (NumberFormatException npe) {
+                R.ltPopCen = 0;
+            }
             RecordList.add(R);
+
+
+
+
         }
         else{
-            String recordmessage = "Set-Record" + delim + token[0] + delim + token[1] + delim + token[2]
+            String recordmessage = "Set-Record " + token[0] + delim + token[1] + delim + token[2]
                     + delim + token[3] + delim + token[4] + delim + token[5] + delim + token[6]
                     + delim + token[7] + delim + token[8];
             buf = recordmessage.getBytes();

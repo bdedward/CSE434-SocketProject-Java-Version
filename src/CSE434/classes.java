@@ -9,6 +9,7 @@ class user {
     public String state;
     public int port;
     public int identifier;
+
 }
 
 // Used to create the logical ring

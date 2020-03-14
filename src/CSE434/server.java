@@ -154,40 +154,50 @@ public class server
                     }
                 }
             }
-            else if(token[0].equals("leave-dht")){
-                dhtInitiated = false;
-
-                for(int i = 0; i < users.size(); i++){
-                    if(leaveDhtUName == users.get(i).username){
-                        users.get(i).state.equals("Free");
-                    }
-                }
-
-
+            else if(token[0].equals("leave-dht")) {
+                d.nUsers--;
                 String message;
-                boolean flag = false;
-                for(int i = 0; i < d.nUsers; i++){
-                    if(token[1].equals(d.n.get(i).username)){
-                        flag = true;
-                        if((i+1) == d.nUsers){
-                            message = "Success " + d.n.get(0).username;
+                if (d.nUsers < 2) {
+                    message = "Failure: There has to be at least two users";
+                    buf = message.getBytes();
+                    sendToClient(buf, ip, ds, port);
+                } else {
+
+                    dhtInitiated = false;
+
+                    for (int i = 0; i < users.size(); i++) {
+                        if (leaveDhtUName == users.get(i).username) {
+                            users.get(i).state.equals("Free");
                         }
-                        else {
-                            message = "Success " + d.n.get(i + 1).username;
+                    }
+
+                    boolean flag = false;
+                    for (int i = 0; i < d.nUsers; i++) {
+                        if (token[1].equals(d.n.get(i).username)) {
+                            flag = true;
+                            if ((i + 1) == d.nUsers-1) {
+                                message = "Success " + d.n.get(0).username;
+                            } else {
+                                message = "Success " + d.n.get(i + 1).username;
+                            }
+                            for(int j = 0; j < users.size(); j++ ){
+                                if(users.get(j).state.equals("InDHT")){
+                                    users.get(j).state = "Free";
+                                }
+                            }
+                            buf = message.getBytes();
+                            sendToClient(buf, ip, ds, port);
+                            i = d.nUsers;
+                            leaveDhtUName = token[1];
                         }
+                    }
+                    d = null;
+                    if (flag == false) {
+                        message = "Failure you are not in DHT";
                         buf = message.getBytes();
-                        sendToClient(buf,ip,ds,port);
-                        i = d.nUsers;
-                        leaveDhtUName = token[1];
+                        sendToClient(buf, ip, ds, port);
                     }
                 }
-                if(flag == false){
-                    message = "Failure you are not in DHT";
-                    buf = message.getBytes();
-                    sendToClient(buf,ip,ds,port);
-                }
-
-
             }
 
 
@@ -274,6 +284,7 @@ public class server
                 users.get(i).state = "InDHT";
                 users.get(i).identifier = i;
             }
+            System.out.println(i + " " + users.get(i).state + " " + users.get(i).username);
             if(token[2].equals(users.get(i).username)){
                 flag = true;
                 users.get(i).state = "Leader";
