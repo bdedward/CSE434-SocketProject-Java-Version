@@ -69,12 +69,13 @@ public class client
                     //Receive message from server
                     DpReceive = recvFServer(ds, receive);
 
-                    //Initializes p2p socket for p2p communication
-                    p2p = new DatagramSocket(Integer.parseInt(token[3]), InetAddress.getByName(token[2]));
-                    p2p.setSoTimeout(100);
+                    if(data(DpReceive.getData()).toString().equalsIgnoreCase("success")) {
+                        //Initializes p2p socket for p2p communication
+                        p2p = new DatagramSocket(Integer.parseInt(token[3]), InetAddress.getByName(token[2]));
+                        p2p.setSoTimeout(100);
 
-                    myuser.username = token[1];
-
+                        myuser.username = token[1];
+                    }
 
                 }
                 else if (token[0].equals("deregister")){
@@ -87,9 +88,7 @@ public class client
                     if(token[0].equals("Success")) {
                         System.exit(0);
                     }
-                    else {
-                        System.out.println("Failure: user in DHT");
-                    }
+
                 }
                 else if (token[0].equals("setup-dht")) {
                     buf = inp.getBytes();
@@ -127,10 +126,6 @@ public class client
                         leftuser.port = d.n.get(d.nUsers -1).port;
                         leftuser.ip_addr = d.n.get(d.nUsers -1).ip_addr;
                         setUserId(p2p, d, receive, userRing, RecordList);
-                    }
-                    else {
-                        System.out.println(data(receive));
-                        receive = new byte[65536];
                     }
                 }
                 else if (token[0].equals("dht-complete")) {
@@ -206,6 +201,9 @@ public class client
                 }
                 else if (token[0].equals("dht-rebuilt")){
 
+                }
+                else {
+                    System.out.println("That is not a valid command, try again");
                 }
 
                 receive = new byte[65535];
@@ -331,7 +329,12 @@ public class client
                         RecordList.clear();
                         leftuser = null;
 
+                        recvFServer(ds,receive);
+                        token = tokenize(data(DpReceive.getData()).toString());
 
+                        if(token[0].equals("Success")) {
+                            System.exit(0);
+                        }
 
 
                         message = "reset-id ";

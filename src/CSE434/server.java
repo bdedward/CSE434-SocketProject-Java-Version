@@ -30,6 +30,7 @@ public class server
         //Other Global variables
         String[] token;
         dht d = new dht();
+        d.dhtCheck = false;
         boolean dhtInitiated = false;
         InetAddress queryIpSource;
         int queryPortSource;
@@ -52,7 +53,10 @@ public class server
                 int check = registerUser(users, token);
                 String message;
                 if(check == -1){
-                    message = "User Already Exist";
+                    message = "Failure User Already Exist";
+                }
+                else if (check == -2){
+                    message = "Failure Username is too long";
                 }
                 else
                     message = "success";
@@ -62,7 +66,18 @@ public class server
                 sendToClient(buf, ip, ds, port);
             }
             else if(token[0].equals("setup-dht")){
-                if(!dhtInitiated) {
+                if(!d.dhtCheck) {
+
+                    for(int i = 0; i < users.size(); i++){
+                        if(token[1].equals(users.get(i).username)){
+                           user temp;
+                           temp = users.get(i);
+                           users.set(i, users.get(0));
+                           users.set(0,temp);
+                        }
+                        System.out.println(users.get(i).username + " " + users.get(i).identifier);
+                    }
+
                     String message;
                     int check = setupDht(users, token, d);
                     if (check == -3) {
@@ -71,47 +86,63 @@ public class server
                         message = "Failure: User does not exist, please use another user for leader";
                     } else {
                         message = "Success in setting up DHT";
-                        dhtInitiated = true;
-                    }
-                    d.message = message;
 
-                    buf = d.message.getBytes();
+                        d.message = message;
 
-                    sendToClient(buf, ip, ds, port);
+                        buf = d.message.getBytes();
 
-                    String temp = d.dhtCheck + " " + d.nUsers + " " + d.leader;
-                    buf = temp.getBytes();
-                    sendToClient(temp.getBytes(), ip, ds, port);
-
-                    for (int j = 0; j < d.n.size(); j++) {
-                        String userTuples = d.n.get(j).username + " " +
-                                d.n.get(j).ip_addr + " " +
-                                d.n.get(j).state + " " +
-                                d.n.get(j).port;
-
-                        buf = userTuples.getBytes();
-                        System.out.println(userTuples);
                         sendToClient(buf, ip, ds, port);
+
+                        String temp = d.dhtCheck + " " + d.nUsers + " " + d.leader;
+                        buf = temp.getBytes();
+                        sendToClient(temp.getBytes(), ip, ds, port);
+
+                        for (int j = 0; j < d.n.size(); j++) {
+                            String userTuples = d.n.get(j).username + " " +
+                                    d.n.get(j).ip_addr + " " +
+                                    d.n.get(j).state + " " +
+                                    d.n.get(j).port;
+
+                            buf = userTuples.getBytes();
+                            System.out.println(userTuples);
+                            sendToClient(buf, ip, ds, port);
+                        }
+
+                        d.message = "done";
+                        buf = d.message.getBytes();
+                        sendToClient(buf, ip, ds, port);
+
+                        dhtInitiated = true;
+                        while(dhtInitiated){
+                            DpReceive = recvFClient(ds,receive);
+                            receive = new byte[65535];
+                            ip = DpReceive.getAddress();
+                            port = DpReceive.getPort();
+                            token = tokenize(data(DpReceive.getData()).toString());
+                            if((token[0].equals("dht-complete"))){
+                                if(token[1].equals(d.leader)){
+                                    dhtInitiated = false;
+                                    d.dhtCheck = true;
+                                    buf = "Success : DHT is complete".getBytes();
+                                    sendToClient(buf, ip, ds, port);
+                                }
+                                else{
+                                    buf = "Failure : You are not the leader".getBytes();
+                                    sendToClient(buf, ip, ds, port);
+                                }
+                            }
+                            else {
+                                message = "Failure waiting for leader to complete dht";
+                                buf = message.getBytes();
+                                sendToClient(buf,ip,ds,port);
+                            }
+                        }
                     }
 
-                    d.message = "done";
-                    buf = d.message.getBytes();
-                    sendToClient(buf, ip, ds, port);
                 }
                 else {
-                    d.message = "Failure: Dht has been initiated by someone else";
+                    d.message = "Failure: Dht has already been setup by " + d.leader;
                     buf = d.message.getBytes();
-                    sendToClient(buf, ip, ds, port);
-                }
-            }
-            else if(token[0].equals("dht-complete")){
-                if(token[1].equals(d.leader)){
-                    d.dhtCheck = true;
-                    buf = "Success: DHT is complete".getBytes();
-                    sendToClient(buf, ip, ds, port);
-                }
-                else{
-                    buf = "Failure: You are not the leader".getBytes();
                     sendToClient(buf, ip, ds, port);
                 }
             }
@@ -142,12 +173,12 @@ public class server
                     if(token[1].equals(users.get(i).username)){
                         if(users.get(i).state.equals("Free")){
                             users.remove(i);
-                            message = "Success Go ahead and exit";
+                            message = "Success";
                             buf = message.getBytes();
                             sendToClient(buf,ip,ds,port);
                         }
                         else{
-                            message = "Failure go ahead and jump off a building!";
+                            message = "Failure User is in DHT use leave-dht command";
                             buf = message.getBytes();
                             sendToClient(buf,ip,ds,port);
                         }
@@ -181,7 +212,7 @@ public class server
                                 message = "Success " + d.n.get(i + 1).username;
                             }
                             for(int j = 0; j < users.size(); j++ ){
-                                if(users.get(j).state.equals("InDHT")){
+                                if((users.get(j).state.equals("InDHT")) || (users.get(j).state.equals("Leader"))){
                                     users.get(j).state = "Free";
                                 }
                             }
@@ -192,6 +223,8 @@ public class server
                         }
                     }
                     d = null;
+                    d = new dht();
+                    d.dhtCheck = false;
                     if (flag == false) {
                         message = "Failure you are not in DHT";
                         buf = message.getBytes();
@@ -256,7 +289,10 @@ public class server
     // Function to register a user
     static int registerUser(ArrayList<user> users, String token[]){
 
-        for(int i = 0; i <= users.size() - 1; i++) {
+        if(token[1].length() > 15){
+            return -2;
+        }
+        for(int i = 0; i < users.size(); i++) {
             if(token[1].equals(users.get(i).username)){
                 return -1;
             }
