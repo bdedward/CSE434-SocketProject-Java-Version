@@ -150,7 +150,11 @@ public class client
                     receive = new byte[65535];
                     if (token[0].equals("Success")) {
                         inp = sc.nextLine();
-                        String[] tokenComma = tokenize(inp);
+                        String[] tokenComma = tokenize(inp);;
+                        while(!(tokenComma[0].equals("query"))) {
+                            inp = sc.nextLine();
+                            tokenComma = tokenize(inp);
+                        }
                         StringBuilder temp = new StringBuilder();
                         for(int i = 1; i < tokenComma.length; i++){
                             if(tokenComma[i] != null) {
@@ -197,11 +201,12 @@ public class client
                     }
                     else {
                         System.out.println(data(DpReceive.getData()).toString());
+                        if(token[0].equals("Success")) {
+                            System.exit(0);
+                        }
                     }
                 }
-                else if (token[0].equals("dht-rebuilt")){
 
-                }
                 else {
                     System.out.println("That is not a valid command, try again");
                 }
@@ -211,18 +216,6 @@ public class client
             else if(!data(receive).toString().isEmpty()){
 
                 if (tokenReceive[0].equals("query")) {
-
-
-                    System.out.println(tokenReceive[1]);
-
-
-//                    StringTokenizer tokenize = new StringTokenizer(, " ");
-//                    String tokenComma[] = new String[20];
-//                    int i = 0;
-//                    while (tokenize.hasMoreElements()) {
-//                        tokenComma[i] = tokenize.nextToken();
-//                        i++;
-//                    }
 
                     StringBuilder longname = new StringBuilder();
                     int tokenCounter = 0;
@@ -237,23 +230,22 @@ public class client
                         }
                     }
 
-                    System.out.println(longname);
 
                     int longSum = 0;
                     for (int k = 0; k < longname.length(); k++){
                         longSum += longname.charAt(k);
                     }
-                    System.out.println(longSum);
+
                     checkCounter = Integer.parseInt(tokenReceive[tokenCounter - 1]);
                     int position = longSum % 353;
                     int id = position % nUsers;
-                    System.out.println(id + " " + nUsers + " " + myuser.identifier);
+
                     String message = "";
                     boolean flagFound = false;
                     if(checkCounter < nUsers) {
                         if (id == myuser.identifier) {
                             for (int j = 0; j < RecordList.size(); j++) {
-                                System.out.println(RecordList.get(j).longName  + " " + longname);
+
                                 if (RecordList.get(j).longName.equals(longname.toString())) {
                                     flagFound = true;
                                     message = "Success: " + RecordList.get(j).countrycode + "," +
@@ -292,6 +284,9 @@ public class client
                     }
                 }
                 else if (tokenReceive[0].equals("Ring-Info")) {
+
+                    leftuser = new ring();
+                    rightuser = new ring();
                     nUsers = setNeighbor(tokenReceive, leftuser, rightuser,
                             myuser, Integer.parseInt(tokenReceive[1]));
                 }
@@ -324,22 +319,21 @@ public class client
                         message = "deregister " + myuser.username;
                         buf = message.getBytes();
                         sendToServer(buf, ip, ds);
-                        myuser = null;
+
                         rightuser = null;
                         RecordList.clear();
                         leftuser = null;
-
-                        recvFServer(ds,receive);
+                        receive = new byte[65535];
+                        DpReceive = recvFServer(ds,receive);
                         token = tokenize(data(DpReceive.getData()).toString());
-
-                        if(token[0].equals("Success")) {
-                            System.exit(0);
-                        }
-
 
                         message = "reset-id ";
                         buf = message.getBytes();
                         sendToClient(buf, newLeader.ip_addr, newLeader.port, p2p);
+
+                        if(token[0].equals("Success")) {
+                            System.exit(0);
+                        }
                     }
                     else{
                         RecordList.clear();
@@ -348,7 +342,6 @@ public class client
                         buf = message.getBytes();
                         sendToClient(buf,rightuser.ip_addr, rightuser.port, p2p);
 
-                        myuser = null;
                         rightuser = null;
                         leftuser = null;
 
@@ -359,17 +352,18 @@ public class client
                     nUsers--;
 
                     System.out.println(newLeaderUName);
-                    message = "setup-dht " + nUsers + " " + newLeaderUName;
+                    message = "setup-dht " + nUsers + " " + newLeaderUName + " " + nUsers;
                     buf = message.getBytes();
                             sendToServer(buf, ip, ds);
-
+                    myuser.identifier = 0;
                     DpReceive.setData(receive, 0, receive.length);
                     ds.receive(DpReceive);
                     System.out.println(data(receive));
 
                     token = tokenize(data(receive).toString());
                     if (token[0].equals("Success")) {
-
+                        rightuser = new ring();
+                        leftuser = new ring();
                         receive = new byte[65535];
 
                         DpReceive.setData(receive, 0, receive.length);
@@ -386,6 +380,13 @@ public class client
 
                         d = setupDht(ds, receive, DpReceive, token, d);
                         nUsers = d.nUsers;
+
+                        rightuser.identifier = d.n.get(1).identifier;
+                        rightuser.port = d.n.get(1).port;
+                        rightuser.ip_addr = d.n.get(1).ip_addr;
+                        leftuser.identifier = d.n.get(d.nUsers -1).identifier;
+                        leftuser.port = d.n.get(d.nUsers -1).port;
+                        leftuser.ip_addr = d.n.get(d.nUsers -1).ip_addr;
                         setUserId(p2p, d, receive, userRing, RecordList);
 
                         message = "dht-complete " + newLeaderUName;

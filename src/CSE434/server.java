@@ -68,16 +68,6 @@ public class server
             else if(token[0].equals("setup-dht")){
                 if(!d.dhtCheck) {
 
-                    for(int i = 0; i < users.size(); i++){
-                        if(token[1].equals(users.get(i).username)){
-                           user temp;
-                           temp = users.get(i);
-                           users.set(i, users.get(0));
-                           users.set(0,temp);
-                        }
-                        System.out.println(users.get(i).username + " " + users.get(i).identifier);
-                    }
-
                     String message;
                     int check = setupDht(users, token, d);
                     if (check == -3) {
@@ -87,14 +77,11 @@ public class server
                     } else {
                         message = "Success in setting up DHT";
 
-                        d.message = message;
-
-                        buf = d.message.getBytes();
+                        buf = message.getBytes();
 
                         sendToClient(buf, ip, ds, port);
 
                         String temp = d.dhtCheck + " " + d.nUsers + " " + d.leader;
-                        buf = temp.getBytes();
                         sendToClient(temp.getBytes(), ip, ds, port);
 
                         for (int j = 0; j < d.n.size(); j++) {
@@ -114,8 +101,8 @@ public class server
 
                         dhtInitiated = true;
                         while(dhtInitiated){
-                            DpReceive = recvFClient(ds,receive);
                             receive = new byte[65535];
+                            DpReceive = recvFClient(ds,receive);
                             ip = DpReceive.getAddress();
                             port = DpReceive.getPort();
                             token = tokenize(data(DpReceive.getData()).toString());
@@ -187,6 +174,7 @@ public class server
             }
             else if(token[0].equals("leave-dht")) {
                 d.nUsers--;
+                leaveDhtUName = token[1];
                 String message;
                 if (d.nUsers < 2) {
                     message = "Failure: There has to be at least two users";
@@ -197,7 +185,7 @@ public class server
                     dhtInitiated = false;
 
                     for (int i = 0; i < users.size(); i++) {
-                        if (leaveDhtUName == users.get(i).username) {
+                        if (leaveDhtUName.equals(users.get(i).username)) {
                             users.get(i).state.equals("Free");
                         }
                     }
@@ -231,6 +219,8 @@ public class server
                         sendToClient(buf, ip, ds, port);
                     }
                 }
+
+
             }
 
 
@@ -315,7 +305,19 @@ public class server
         int indexOfLeader = 0;
         int i = 0;
         boolean flag = false;
-        for(i = 0; i < users.size(); i++){
+
+        for(int k = 0; k < users.size(); k++){
+            if(token[2].equals(users.get(k).username)){
+                user temp;
+                temp = users.get(k);
+                users.set(k, users.get(0));
+                users.set(0,temp);
+            }
+            System.out.println(users.get(i).username + " " + users.get(i).identifier);
+        }
+
+
+        for(i = 0; i < Integer.parseInt(token[1]); i++){
             if(users.get(i).state.equals("Free")){
                 users.get(i).state = "InDHT";
                 users.get(i).identifier = i;
