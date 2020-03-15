@@ -23,7 +23,8 @@ public class client
 
         // Ip address for server, this will change to command line input
         //TODO: change ip input to command line input
-        InetAddress ip = InetAddress.getByName("192.168.0.236");
+        InetAddress ip = InetAddress.getByName(args[0]);
+        int serverPort = Integer.parseInt(args[1]);
 
         // Blocking Scanner
         Scanner sc = new Scanner(System.in);
@@ -64,7 +65,7 @@ public class client
                     //Convert string to bytes and send to server
                     buf = inp.getBytes();
                     //Send message to server
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     //Receive message from server
                     DpReceive = recvFServer(ds, receive);
@@ -80,7 +81,7 @@ public class client
                 }
                 else if (token[0].equals("deregister")){
                     buf = inp.getBytes();
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     recvFServer(ds,receive);
                     token = tokenize(data(DpReceive.getData()).toString());
@@ -93,7 +94,7 @@ public class client
                 else if (token[0].equals("setup-dht")) {
                     buf = inp.getBytes();
 
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     DpReceive.setData(receive, 0, receive.length);
                     ds.receive(DpReceive);
@@ -101,7 +102,7 @@ public class client
 
                     token = tokenize(data(receive).toString());
                     if (token[0].equals("Success")) {
-
+                        myuser.identifier = 0;
                         receive = new byte[65535];
 
                         DpReceive.setData(receive, 0, receive.length);
@@ -131,7 +132,7 @@ public class client
                 else if (token[0].equals("dht-complete")) {
                     String complete = token[0] + " " + token[1];
                     buf = complete.getBytes();
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     DpReceive.setData(receive, 0, receive.length);
                     recvFServer(ds, receive);
@@ -139,7 +140,7 @@ public class client
                 else if (token[0].equals("query-dht")) {
                     String query = token[0];
                     buf = query.getBytes();
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     DpReceive.setData(receive, 0, receive.length);
                     recvFServer(ds, receive);
@@ -184,7 +185,7 @@ public class client
                 }
                 else if (token[0].equals("leave-dht")){
                     buf = inp.getBytes();
-                    sendToServer(buf, ip, ds);
+                    sendToServer(buf, ip, ds, serverPort);
 
                     recvFServer(ds,receive);
                     token = tokenize(data(DpReceive.getData()).toString());
@@ -205,6 +206,22 @@ public class client
                             System.exit(0);
                         }
                     }
+                }
+                else if (token[0].equals("teardown-dht")){
+                    String message = inp;
+                    buf = message.getBytes();
+                    sendToServer(buf,ip,ds,serverPort);
+
+                    DpReceive = recvFServer(ds, receive);
+                    receive = new byte[65535];
+                    tokenReceive = tokenize(data(DpReceive.getData()).toString());
+
+                    if(tokenReceive[0].equals("success")){
+                        message = "teardownUser " + token[1];
+                        buf = message.getBytes();
+                        sendToClient(buf,rightuser.ip_addr, rightuser.port, p2p);
+                    }
+
                 }
 
                 else {
@@ -275,7 +292,7 @@ public class client
                             System.out.println("I have it ! ");
                             buf = message.getBytes();
                             System.out.println(message);
-                            sendToServer(buf, ip, ds);
+                            sendToServer(buf, ip, ds, serverPort);
                         }
 
                     }
@@ -318,11 +335,11 @@ public class client
                     if(tokenReceive[1].equals(myuser.username)){
                         message = "deregister " + myuser.username;
                         buf = message.getBytes();
-                        sendToServer(buf, ip, ds);
+                        sendToServer(buf, ip, ds, serverPort);
 
-                        rightuser = null;
+                        rightuser = new ring();
                         RecordList.clear();
-                        leftuser = null;
+                        leftuser = new ring();
                         receive = new byte[65535];
                         DpReceive = recvFServer(ds,receive);
                         token = tokenize(data(DpReceive.getData()).toString());
@@ -342,9 +359,38 @@ public class client
                         buf = message.getBytes();
                         sendToClient(buf,rightuser.ip_addr, rightuser.port, p2p);
 
-                        rightuser = null;
-                        leftuser = null;
+                        rightuser = new ring();
+                        leftuser = new ring();
 
+                    }
+                }
+                else if(tokenReceive[0].equals("teardownUser")){
+                    String message = tokenReceive[0] + " " + tokenReceive[1];
+                    if(tokenReceive[1].equals(myuser.username)){
+                        rightuser = new ring();
+                        leftuser = new ring();
+                        RecordList = new ArrayList<>();
+
+                        inp = sc.nextLine();
+                        token = tokenize(inp);
+                        while(!(token[0].equals("teardown-complete"))){
+                            inp = sc.nextLine();
+                            token = tokenize(inp);
+                        }
+                        buf = inp.getBytes();
+                        sendToServer(buf, ip, ds, serverPort);
+
+                        recvFServer(ds,receive);
+                        receive = new byte[65535];
+
+                    }
+                    else {
+                        buf = message.getBytes();
+                        sendToClient(buf, rightuser.ip_addr, rightuser.port, p2p);
+
+                        rightuser = new ring();
+                        leftuser = new ring();
+                        RecordList = new ArrayList<>();
                     }
                 }
                 else if(tokenReceive[0].equals("reset-id")) {
@@ -354,7 +400,7 @@ public class client
                     System.out.println(newLeaderUName);
                     message = "setup-dht " + nUsers + " " + newLeaderUName + " " + nUsers;
                     buf = message.getBytes();
-                            sendToServer(buf, ip, ds);
+                            sendToServer(buf, ip, ds, serverPort);
                     myuser.identifier = 0;
                     DpReceive.setData(receive, 0, receive.length);
                     ds.receive(DpReceive);
@@ -391,7 +437,7 @@ public class client
 
                         message = "dht-complete " + newLeaderUName;
                         buf = message.getBytes();
-                        sendToServer(buf, ip,ds);
+                        sendToServer(buf, ip, ds, serverPort);
                     }
                 }
 
@@ -452,9 +498,9 @@ public class client
     }
 
     // Function for sending message to server
-    static void sendToServer(byte[] a, InetAddress ip, DatagramSocket ds) throws IOException {
+    static void sendToServer(byte[] a, InetAddress ip, DatagramSocket ds, int serverPort) throws IOException {
         DatagramPacket DpSend =
-                new DatagramPacket(a, a.length, ip, 1234);
+                new DatagramPacket(a, a.length, ip, serverPort);
 
         ds.send(DpSend);
     }

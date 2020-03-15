@@ -17,7 +17,7 @@ public class server
         //Global Variables
         // Server socket used to listen for message from client
         //TODO: port should be given from command line, ip should be based on host ip.
-        DatagramSocket ds = new DatagramSocket(1234, InetAddress.getByName("192.168.0.236"));
+        DatagramSocket ds = new DatagramSocket(Integer.parseInt(args[0]), InetAddress.getLocalHost());
         DatagramPacket DpReceive = null;
 
         // Buffers for receive and send
@@ -35,6 +35,7 @@ public class server
         InetAddress queryIpSource;
         int queryPortSource;
         String leaveDhtUName = "";
+        String teardownLeaderName = "";
 
         while (true)
         {
@@ -221,6 +222,41 @@ public class server
                 }
 
 
+            }
+            else if(token[0].equals("teardown-dht")){
+                String message;
+               if(token[1].equals(d.leader)) {
+                   teardownLeaderName = token[1];
+                   message = "success";
+                   buf = message.getBytes();
+                   sendToClient(buf,ip,ds,port);
+               }
+               else{
+                   message = "Failure you are not the leader";
+                   buf = message.getBytes();
+                   sendToClient(buf,ip,ds,port);
+               }
+            }
+            else if(token[0].equals("teardown-complete")){
+                String message;
+
+                for(int i = 0; i < users.size(); i++){
+                    users.get(i).state = "Free";
+                }
+
+                if(teardownLeaderName.equals(token[1])){
+                    d = null;
+                    d = new dht();
+                    d.dhtCheck = false;
+                    message = "Success Teardown of DHT has been completed";
+                    buf = message.getBytes();
+                    sendToClient(buf,ip,ds,port);
+                }
+                else{
+                    message = "Failure You are not the leader";
+                    buf = message.getBytes();
+                    sendToClient(buf,ip,ds,port);
+                }
             }
 
 
